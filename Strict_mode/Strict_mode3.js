@@ -2,5 +2,5 @@
 const student2 = {
     fullname: "tuan"
 }
-// delete student 
+// delete student //lỗi
 console.log(student2);

@@ -12,12 +12,13 @@ body {
 }
 
 .container {
-    width: 400px;
+    width: 450px;
     background: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
                 0 25px 50px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    border-radius: 8px;
     overflow: hidden;
+    padding: 20px;
 }
 
 /* Tiêu đề */
@@ -39,6 +40,8 @@ input[type="text"] {
     box-sizing: border-box;
     color: #4d4d4d;
     font-style: italic;
+    border-bottom: 1px solid #ededed;
+    margin-bottom: 10px;
 }
 
 input[type="text"]::placeholder {
@@ -51,6 +54,8 @@ ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .todo-item {
@@ -77,10 +82,11 @@ ul {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
+    padding: 10px 0;
     font-size: 14px;
     color: #777;
     border-top: 1px solid #e6e6e6;
+    margin-top: 20px;
 }
 
 .footer button {
@@ -103,10 +109,13 @@ ul {
     padding: 4px 8px;
     border-radius: 3px;
     cursor: pointer;
+    border: 1px solid transparent;
+    font-size: 14px;
 }
 
 .filter-button.selected {
     border: 1px solid rgba(175, 47, 47, 0.2);
+    color: #af2f2f;
 }
 
 /* Ẩn các mục hoàn thành */

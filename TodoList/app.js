@@ -1,87 +1,71 @@
 // app.js
-document.addEventListener("DOMContentLoaded", () => {
-    const todoInput = document.getElementById("todo-input");
-    const todoList = document.getElementById("todo-list");
-    const todoCount = document.getElementById("todo-count");
-    const clearCompletedButton = document.getElementById("clear-completed");
-    const filterButtons = document.querySelectorAll(".filter-button");
+import { getState, dispatch, subscribe } from './store.js';
 
-    let todos = [];
-    let filter = 'all';
+// Các hàm cập nhật giao diện
+function renderTodos() {
+  const todoList = document.getElementById('todo-list');
+  todoList.innerHTML = '';
 
-    // Cập nhật danh sách Todo
-    function render() {
-        todoList.innerHTML = "";
-        const filteredTodos = todos.filter(todo => {
-            if (filter === 'active') return !todo.completed;
-            if (filter === 'completed') return todo.completed;
-            return true;
-        });
+  const { todos, filter } = getState();
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'active') return !todo.completed;
+    if (filter === 'completed') return todo.completed;
+    return true;
+  });
 
-        filteredTodos.forEach(todo => {
-            const todoItem = document.createElement("li");
-            todoItem.className = `todo-item ${todo.completed ? "completed" : ""}`;
-            todoItem.innerHTML = `
-                <input type="checkbox" ${todo.completed ? "checked" : ""}>
-                <label>${todo.text}</label>
-            `;
-            todoItem.querySelector("input").addEventListener("click", () => toggleTodo(todo.id));
-            todoList.appendChild(todoItem);
-        });
+  filteredTodos.forEach(todo => {
+    const todoItem = document.createElement('li');
+    todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+    todoItem.innerHTML = `
+      <input type="checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
+      <span>${todo.text}</span>
+    `;
+    todoList.appendChild(todoItem);
+  });
 
-        updateTodoCount();
+  document.getElementById('todo-count').textContent = `${todos.filter(todo => !todo.completed).length} items left`;
+}
+
+function renderFilters() {
+  const { filter } = getState();
+  document.querySelectorAll('.filter-button').forEach(button => {
+    button.classList.toggle('selected', button.getAttribute('data-filter') === filter);
+  });
+}
+
+// Sự kiện và cập nhật store
+document.getElementById('todo-input').addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    const text = event.target.value.trim();
+    if (text) {
+      dispatch({ type: 'ADD_TODO', payload: text });
+      event.target.value = '';
     }
-
-    // Thêm công việc mới
-    function addTodo(text) {
-        todos.push({ id: Date.now(), text, completed: false });
-        render();
-    }
-
-    // Chuyển đổi trạng thái hoàn thành
-    function toggleTodo(id) {
-        todos = todos.map(todo => 
-            todo.id === id ? { ...todo, completed: !todo.completed } : todo
-        );
-        render();
-    }
-
-    // Xóa các công việc đã hoàn thành
-    function clearCompleted() {
-        todos = todos.filter(todo => !todo.completed);
-        render();
-    }
-
-    // Cập nhật số lượng công việc chưa hoàn thành
-    function updateTodoCount() {
-        const count = todos.filter(todo => !todo.completed).length;
-        todoCount.textContent = `${count} item${count !== 1 ? 's' : ''} left`;
-    }
-
-    // Thiết lập bộ lọc và cập nhật giao diện
-    function setFilter(newFilter) {
-        filter = newFilter;
-        filterButtons.forEach(button => {
-            button.classList.toggle("selected", button.dataset.filter === filter);
-        });
-        render();
-    }
-
-    // Sự kiện khi nhấn Enter trong ô nhập liệu
-    todoInput.addEventListener("keyup", (e) => {
-        if (e.key === "Enter" && todoInput.value.trim()) {
-            addTodo(todoInput.value.trim());
-            todoInput.value = "";
-        }
-    });
-
-    // Sự kiện khi nhấn nút "Clear completed"
-    clearCompletedButton.addEventListener("click", clearCompleted);
-
-    // Sự kiện khi nhấn các nút lọc
-    filterButtons.forEach(button => {
-        button.addEventListener("click", () => setFilter(button.dataset.filter));
-    });
-
-    render();
+  }
 });
+
+document.getElementById('todo-list').addEventListener('change', event => {
+  if (event.target.matches('input[type="checkbox"]')) {
+    const id = Number(event.target.getAttribute('data-id'));
+    dispatch({ type: 'TOGGLE_TODO', payload: id });
+  }
+});
+
+document.querySelector('.filters').addEventListener('click', event => {
+  if (event.target.matches('.filter-button')) {
+    const filter = event.target.getAttribute('data-filter');
+    dispatch({ type: 'SET_FILTER', payload: filter });
+  }
+});
+
+document.getElementById('clear-completed').addEventListener('click', () => {
+  dispatch({ type: 'CLEAR_COMPLETED' });
+});
+
+// Cập nhật giao diện mỗi khi store thay đổi
+subscribe(renderTodos);
+subscribe(renderFilters);
+
+// Khởi chạy ứng dụng
+renderTodos();
+renderFilters();
